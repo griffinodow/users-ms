@@ -13,7 +13,7 @@ export const handler = async (
     .deleteItem({
       TableName: "Users",
       Key: {
-        uuid: { S: uuid },
+        id: { S: uuid },
       },
     })
     .promise();

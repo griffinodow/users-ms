@@ -31,12 +31,12 @@ export class UsersMsStack extends cdk.Stack {
     // DynamoDB
     const table = new Table(this, "Users", {
       tableName: "Users",
-      partitionKey: { name: "uuid", type: AttributeType.STRING },
+      partitionKey: { name: "id", type: AttributeType.STRING },
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
 
     table.addGlobalSecondaryIndex({
-      indexName: "indexEmail1",
+      indexName: "indexEmail",
       partitionKey: { name: "email", type: AttributeType.STRING },
       projectionType: ProjectionType.ALL,
     });
@@ -99,7 +99,7 @@ export class UsersMsStack extends cdk.Stack {
 
     handleUpdateUser.addToRolePolicy(
       new PolicyStatement({
-        actions: ["dynamodb:PutItem", "dynamodb:GetItem"],
+        actions: ["dynamodb:UpdateItem", "dynamodb:GetItem"],
         resources: ["*"],
       })
     );

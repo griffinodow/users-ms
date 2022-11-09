@@ -16,7 +16,7 @@ export const handler = async (
   const user = await client
     .query({
       TableName: "Users",
-      IndexName: "indexEmail1",
+      IndexName: "indexEmail",
       KeyConditionExpression: "email = :email",
       ExpressionAttributeValues: { ":email": { S: email } },
       Limit: 1,
@@ -29,19 +29,17 @@ export const handler = async (
   await client
     .putItem({
       TableName: "Users",
-      Item: {
-        uuid: {
-          S: v4(),
-        },
-        email: {
-          S: email,
-        },
-        password: {
-          S: pbkdf2Sync(password, "thisisthesalt", 1000, 64, "sha512").toString(
-            "hex"
-          ),
-        },
-      },
+      Item: DynamoDB.Converter.marshall({
+        id: v4(),
+        email,
+        password: pbkdf2Sync(
+          password,
+          "thisisthesalt",
+          1000,
+          64,
+          "sha512"
+        ).toString("hex"),
+      }),
     })
     .promise();
   return statusCreate();

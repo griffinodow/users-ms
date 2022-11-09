@@ -9,24 +9,23 @@ export const handler = async (
   if (!uuid) return statusFail("Uuid required");
 
   const client = new DynamoDB();
-  const user = await client
+  const data = await client
     .getItem({
       TableName: "Users",
       Key: {
-        uuid: { S: uuid },
+        id: { S: uuid },
       },
+      ProjectionExpression: "id, email",
     })
     .promise();
-  const item = user.Item;
-  if (!item) return statusFail("User does not exist");
-  const data = DynamoDB.Converter.unmarshall(item);
-  delete data.password;
+  const user = data?.Item && DynamoDB.Converter.unmarshall(data.Item);
+  if (!user) return statusFail("User does not exist");
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      user: data,
+      user,
     }),
   };
 };

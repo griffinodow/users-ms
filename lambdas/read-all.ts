@@ -12,16 +12,16 @@ export const handler = async (
       Limit: 5,
       ExclusiveStartKey: lastEvaluated
         ? {
-            uuid: {
+            id: {
               S: lastEvaluated,
             },
           }
         : undefined,
+      ProjectionExpression: "id, email",
     })
     .promise();
-  const users = data.Items?.map((user) =>
-    DynamoDB.Converter.unmarshall(user)
-  ).filter((user) => delete user.password);
+
+  const users = data.Items?.map((user) => DynamoDB.Converter.unmarshall(user));
 
   return {
     statusCode: 200,
