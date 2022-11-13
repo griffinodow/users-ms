@@ -23,3 +23,11 @@ export const statusFail = (message: string = "Bad Request") => ({
     message,
   }),
 });
+
+export const statusForbidden = () => ({
+  statusCode: 403,
+  headers,
+  body: JSON.stringify({
+    message: "Forbidden",
+  }),
+});

@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { DynamoDB } from "aws-sdk";
-import { statusFail } from "./utils/responses";
+import { isAuthorized } from "./utils/authorizer";
+import { statusFail, statusForbidden } from "./utils/responses";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -10,6 +11,7 @@ export const handler = async (
   const body = JSON.parse(event.body);
   const email = body?.email;
   if (!uuid) return statusFail("Uuid required");
+  if (!isAuthorized(event, uuid)) return statusForbidden();
 
   const client = new DynamoDB();
   const data = await client
