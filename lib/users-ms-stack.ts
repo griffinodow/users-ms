@@ -108,7 +108,7 @@ export class UsersMsStack extends cdk.Stack {
     );
 
     // API Gateway
-    const api = new RestApi(this, "UsersApiGw", {
+    const api = new RestApi(this, "UsersGw", {
       endpointTypes: [EndpointType.REGIONAL],
     });
     api.root.addMethod("POST", new LambdaIntegration(handleCreateUser));
