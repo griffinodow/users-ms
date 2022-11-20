@@ -1,8 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as path from "path";
-import { DnsValidatedCertificate } from "aws-cdk-lib/aws-certificatemanager";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
-import { CnameRecord, HostedZone } from "aws-cdk-lib/aws-route53";
 import { Construct } from "constructs";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import {
@@ -12,21 +10,19 @@ import {
   ProjectionType,
 } from "aws-cdk-lib/aws-dynamodb";
 import {
-  DomainName,
   EndpointType,
   LambdaIntegration,
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { CfnApiMapping } from "aws-cdk-lib/aws-apigatewayv2";
 
 export class UsersMsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // Constants
-    const domain = "griffindow.com";
-    const subdomain = `api.tasks.${domain}`;
-    const zone = HostedZone.fromLookup(this, "Zone", { domainName: domain });
+    const subdomain = `api.tasks.griffindow.com`;
 
     // DynamoDB
     const table = new Table(this, "Users", {
@@ -112,7 +108,7 @@ export class UsersMsStack extends cdk.Stack {
     );
 
     // API Gateway
-    const api = new RestApi(this, "Users API", {
+    const api = new RestApi(this, "UsersApiGw", {
       endpointTypes: [EndpointType.REGIONAL],
     });
     api.root.addMethod("POST", new LambdaIntegration(handleCreateUser));
@@ -122,23 +118,12 @@ export class UsersMsStack extends cdk.Stack {
     users.addMethod("PUT", new LambdaIntegration(handleUpdateUser));
     users.addMethod("DELETE", new LambdaIntegration(handleDeleteUser));
 
-    // Domain
-    const certificate = new DnsValidatedCertificate(this, "SiteCertificate", {
+    // API path mapping
+    new CfnApiMapping(this, `UsersMsPathMapping`, {
+      apiId: api.restApiId,
       domainName: subdomain,
-      hostedZone: zone,
-      region: "us-east-1",
-    });
-    const customDomain = new DomainName(this, "customDomain", {
-      domainName: subdomain,
-      certificate: certificate,
-      endpointType: EndpointType.REGIONAL,
-    });
-
-    customDomain.addApiMapping(api.deploymentStage, { basePath: "v1/users" });
-    new CnameRecord(this, "ApiGatewayRecordSet", {
-      zone: zone,
-      recordName: subdomain,
-      domainName: customDomain.domainNameAliasDomainName,
+      stage: api.deploymentStage.stageName,
+      apiMappingKey: "v1/users",
     });
   }
 }
