@@ -110,8 +110,12 @@ export class UsersMsStack extends cdk.Stack {
     // API Gateway
     const api = new RestApi(this, "UsersGw", {
       endpointTypes: [EndpointType.REGIONAL],
+      defaultCorsPreflightOptions: {
+        allowOrigins: ["*"],
+      },
     });
     api.root.addMethod("POST", new LambdaIntegration(handleCreateUser));
+
     api.root.addMethod("GET", new LambdaIntegration(handleReadAllUser));
     const users = api.root.addResource("{uuid}");
     users.addMethod("GET", new LambdaIntegration(handleReadUser));

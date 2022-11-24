@@ -1,4 +1,7 @@
-const headers = { "Content-Type": "application/json" };
+const headers = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+};
 
 export const statusSuccess = () => ({
   statusCode: 200,
