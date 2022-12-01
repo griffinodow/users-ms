@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { DynamoDB } from "aws-sdk";
 import { isAuthorized } from "./utils/authorizer";
-import { statusFail, statusForbidden } from "./utils/responses";
+import { statusFail, statusForbidden, statusSuccess } from "./utils/responses";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -21,12 +21,8 @@ export const handler = async (
     .promise();
   const user = data?.Item && DynamoDB.Converter.unmarshall(data.Item);
   if (!user) return statusFail("User does not exist");
+  user.uuid = user.id;
+  delete user.id;
 
-  return {
-    statusCode: 200,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      user,
-    }),
-  };
+  return statusSuccess({ user });
 };

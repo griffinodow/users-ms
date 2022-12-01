@@ -3,12 +3,10 @@ const headers = {
   "Access-Control-Allow-Origin": "*",
 };
 
-export const statusSuccess = () => ({
+export const statusSuccess = (body?: any) => ({
   statusCode: 200,
   headers,
-  body: JSON.stringify({
-    message: "success",
-  }),
+  body: JSON.stringify(body),
 });
 
 export const statusCreate = () => ({
